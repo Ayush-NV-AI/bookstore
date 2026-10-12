@@ -27,6 +27,10 @@ npm --prefix web run test:e2e                 # Playwright against the real API 
 - `GEMINI.md` + `docs/context/*.md` — what the agent is told on every prompt.
 - `specs/<###-feature>/` — spec → plan → tasks for every feature.
 - `.aiexclude` / `.geminiignore` — what the agent may never read.
+- `.gemini/agents/`, `.gemini/commands/`, `.gemini/hooks/` — subagents, team rituals and deterministic enforcement.
+- `.gemini/config.yaml` + `.gemini/styleguide.md` — how the GitHub review agent reviews pull requests.
+- `.github/workflows/ci.yml` — tests + headless constitution gate on every pull request.
+- `docs/governance/antigravity-migration-briefing.md` — what survives a tool change.
 
 ## Capstone (Day 3 PM)
 

@@ -1,0 +1,27 @@
+# Gemini Code Assist on GitHub — repository configuration.
+# Overrides any group-level settings from the Developer Connect connection for this repository.
+# Docs: "Customize Gemini Code Assist behavior in GitHub" (docs.cloud.google.com/gemini/docs/code-review).
+
+have_fun: false
+
+# Generated or vendored files: reviewing them burns comments without adding value.
+ignore_patterns:
+  - "web/package-lock.json"
+  - ".specify/scripts/**"
+  - ".specify/templates/**"
+  - "specs/**/checklists/**"
+
+memory_config:
+  disabled: false
+
+code_review:
+  disable: false
+  # MEDIUM and above only: LOW-severity style nits are handled by the style guide, not by comment volume.
+  comment_severity_threshold: MEDIUM
+  # A reviewer who leaves 60 comments gets none of them read.
+  max_review_comments: 20
+  pull_request_opened:
+    help: false
+    summary: true
+    code_review: true
+    include_drafts: false

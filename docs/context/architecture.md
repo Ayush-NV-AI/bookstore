@@ -1,9 +1,9 @@
 # Architecture
 
-## Current state (legacy — do not copy these patterns)
+## Legacy (removed by spec 001 — never reintroduce these patterns)
 
-The first version was vibe-coded in a weekend. These parts are **legacy** and are being replaced
-feature by feature through specs. Never use them as a template for new code:
+The first version was vibe-coded in a weekend. Spec `001-book-catalog` deleted these files. They are listed
+so that nobody — human or agent — rebuilds them:
 
 | Legacy file | Problem |
 |---|---|

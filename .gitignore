@@ -4,3 +4,14 @@ node_modules/
 dist/
 *.user
 .vs/
+
+# secrets never go to git (Constitution VI)
+.env
+.env.*
+!.env.example
+secrets/
+**/appsettings.*.local.json
+
+# test output
+web/playwright-report/
+web/test-results/

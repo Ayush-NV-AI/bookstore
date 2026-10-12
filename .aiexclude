@@ -1,0 +1,24 @@
+# .aiexclude — Gemini Code Assist (IDE chat, agent mode, code completion, Enterprise indexing)
+# Syntax follows .gitignore. Files matched here are never sent as context.
+
+# --- Secrets and credentials (Constitution VI) ---
+.env
+.env.*
+!.env.example
+secrets/
+**/*.pfx
+**/*.pem
+**/*.key
+**/appsettings.*.local.json
+
+# --- Build output and dependencies (noise, wasted tokens) ---
+**/bin/
+**/obj/
+web/node_modules/
+web/dist/
+web/playwright-report/
+web/test-results/
+
+# --- Generated / binary ---
+*.log
+*.zip

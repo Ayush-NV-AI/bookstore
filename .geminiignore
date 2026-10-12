@@ -1,0 +1,19 @@
+# .geminiignore — Gemini CLI (and agent mode, which runs the CLI under the hood)
+# Same syntax as .gitignore. Keeps files out of read_many_files, @ includes and search tools.
+
+.env
+.env.*
+!.env.example
+secrets/
+**/*.pfx
+**/*.pem
+**/*.key
+**/appsettings.*.local.json
+
+**/bin/
+**/obj/
+web/node_modules/
+web/dist/
+web/playwright-report/
+web/test-results/
+*.log

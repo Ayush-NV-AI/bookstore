@@ -1,0 +1,204 @@
+openapi: 3.1.0
+info:
+  title: Book Store — Cart and Orders API
+  version: 1.0.0
+  description: Contract for spec 002-orders-cart. The seam between the three parallel subagents.
+servers:
+  - url: http://localhost:5080
+paths:
+  /api/v1/carts:
+    post:
+      operationId: createCart
+      summary: Create an empty cart
+      responses:
+        '201':
+          description: Created. Location header points to the cart.
+          headers:
+            Location: { schema: { type: string } }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CartView' }
+  /api/v1/carts/{cartId}:
+    get:
+      operationId: getCart
+      parameters: [ { $ref: '#/components/parameters/CartId' } ]
+      responses:
+        '200':
+          description: The cart with server-computed totals
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CartView' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/v1/carts/{cartId}/items/{bookId}:
+    put:
+      operationId: setCartItemQuantity
+      summary: Set (not add to) the quantity of a book in the cart
+      parameters:
+        - { $ref: '#/components/parameters/CartId' }
+        - { $ref: '#/components/parameters/BookId' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SetQuantity' }
+      responses:
+        '200':
+          description: Updated cart
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CartView' }
+        '400': { $ref: '#/components/responses/ValidationProblem' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+    delete:
+      operationId: removeCartItem
+      summary: Remove a line (idempotent)
+      parameters:
+        - { $ref: '#/components/parameters/CartId' }
+        - { $ref: '#/components/parameters/BookId' }
+      responses:
+        '200':
+          description: Updated cart
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CartView' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/v1/orders:
+    post:
+      operationId: placeOrder
+      summary: Check out a cart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PlaceOrder' }
+      responses:
+        '201':
+          description: Order placed. Location header points to the order.
+          headers:
+            Location: { schema: { type: string } }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/OrderView' }
+        '400': { $ref: '#/components/responses/ValidationProblem' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+    get:
+      operationId: listOrders
+      summary: Orders for an email, newest first
+      parameters:
+        - name: customerEmail
+          in: query
+          required: true
+          schema: { type: string, format: email }
+      responses:
+        '200':
+          description: Orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/OrderView' }
+        '400': { $ref: '#/components/responses/ValidationProblem' }
+  /api/v1/orders/{orderId}:
+    get:
+      operationId: getOrder
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: The order
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/OrderView' }
+        '404': { $ref: '#/components/responses/NotFound' }
+components:
+  parameters:
+    CartId:
+      name: cartId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    BookId:
+      name: bookId
+      in: path
+      required: true
+      schema: { type: integer }
+  responses:
+    NotFound:
+      description: Cart, book or order not found
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+    Conflict:
+      description: Not enough stock
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+    ValidationProblem:
+      description: Invalid input, or an empty cart at checkout
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+  schemas:
+    CartLineView:
+      type: object
+      required: [bookId, title, unitPrice, quantity, lineTotal]
+      properties:
+        bookId: { type: integer }
+        title: { type: string }
+        unitPrice: { type: number, multipleOf: 0.01, description: Current catalog price }
+        quantity: { type: integer, minimum: 1, maximum: 10 }
+        lineTotal: { type: number, multipleOf: 0.01 }
+    CartView:
+      type: object
+      required: [id, items, itemCount, subtotal]
+      properties:
+        id: { type: string, format: uuid }
+        items: { type: array, items: { $ref: '#/components/schemas/CartLineView' } }
+        itemCount: { type: integer, description: Sum of quantities }
+        subtotal: { type: number, multipleOf: 0.01 }
+    SetQuantity:
+      type: object
+      required: [quantity]
+      properties:
+        quantity: { type: integer, minimum: 1, maximum: 10 }
+    PlaceOrder:
+      type: object
+      required: [cartId, customerEmail]
+      properties:
+        cartId: { type: string, format: uuid }
+        customerEmail: { type: string, format: email, maxLength: 254 }
+    OrderLineView:
+      type: object
+      required: [bookId, title, unitPrice, quantity, lineTotal]
+      properties:
+        bookId: { type: integer }
+        title: { type: string }
+        unitPrice: { type: number, multipleOf: 0.01, description: Price at checkout }
+        quantity: { type: integer }
+        lineTotal: { type: number, multipleOf: 0.01 }
+    OrderView:
+      type: object
+      required: [id, orderNumber, status, customerEmail, placedAt, total, lines]
+      properties:
+        id: { type: string, format: uuid }
+        orderNumber: { type: string, example: BS-20261014-004211 }
+        status: { type: string, enum: [Placed] }
+        customerEmail: { type: string }
+        placedAt: { type: string, format: date-time }
+        total: { type: number, multipleOf: 0.01 }
+        lines: { type: array, items: { $ref: '#/components/schemas/OrderLineView' } }
+    ProblemDetails:
+      type: object
+      properties:
+        type: { type: string }
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: string }
+        errors:
+          type: object
+          additionalProperties: { type: array, items: { type: string } }

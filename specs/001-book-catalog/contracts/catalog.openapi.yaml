@@ -1,0 +1,134 @@
+openapi: 3.1.0
+info:
+  title: Book Store — Catalog API
+  version: 1.0.0
+  description: Contract for spec 001-book-catalog. Source of truth per Constitution II.
+servers:
+  - url: http://localhost:5080
+paths:
+  /api/v1/catalog/books:
+    get:
+      operationId: listBooks
+      summary: List a page of books
+      parameters:
+        - name: search
+          in: query
+          description: Case-insensitive substring of title or author. Trimmed. Max 100 chars.
+          schema: { type: string, maxLength: 100 }
+        - name: genre
+          in: query
+          description: Case-insensitive exact genre match. Unknown genre returns an empty page.
+          schema: { type: string, maxLength: 50 }
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [title, price_asc, price_desc, newest]
+            default: title
+        - name: page
+          in: query
+          schema: { type: integer, minimum: 1, default: 1 }
+        - name: pageSize
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 48, default: 12 }
+      responses:
+        '200':
+          description: A page of book summaries (empty items past the last page)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PagedBookSummary' }
+        '400':
+          description: Invalid query parameter
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ValidationProblemDetails' }
+  /api/v1/catalog/books/{id}:
+    get:
+      operationId: getBook
+      summary: Get one book's details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Book details
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/BookDetail' }
+        '404':
+          description: No book with this id
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetails' }
+  /api/v1/catalog/genres:
+    get:
+      operationId: listGenres
+      summary: Distinct genres, alphabetical
+      responses:
+        '200':
+          description: Genre names
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { type: string }
+  /health:
+    get:
+      operationId: health
+      summary: Readiness — 200 when the database is reachable, 503 otherwise
+      responses:
+        '200': { description: Healthy }
+        '503': { description: Database unreachable }
+components:
+  schemas:
+    BookSummary:
+      type: object
+      required: [id, title, author, genre, price, inStock]
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        author: { type: string }
+        genre: { type: string }
+        price: { type: number, multipleOf: 0.01, minimum: 0, description: INR list price, two decimals }
+        inStock: { type: boolean }
+    BookDetail:
+      allOf:
+        - $ref: '#/components/schemas/BookSummary'
+        - type: object
+          required: [isbn, publishedYear, stockQuantity, description]
+          properties:
+            isbn: { type: string, pattern: '^[0-9]{13}$' }
+            publishedYear: { type: integer }
+            stockQuantity: { type: integer, minimum: 0 }
+            description: { type: string }
+    PagedBookSummary:
+      type: object
+      required: [items, page, pageSize, totalCount, totalPages]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/BookSummary' }
+        page: { type: integer }
+        pageSize: { type: integer }
+        totalCount: { type: integer }
+        totalPages: { type: integer }
+    ProblemDetails:
+      type: object
+      properties:
+        type: { type: string }
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: string }
+        instance: { type: string }
+    ValidationProblemDetails:
+      allOf:
+        - $ref: '#/components/schemas/ProblemDetails'
+        - type: object
+          properties:
+            errors:
+              type: object
+              additionalProperties:
+                type: array
+                items: { type: string }

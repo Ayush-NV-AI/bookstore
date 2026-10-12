@@ -1,3 +1,5 @@
+# Day-to-day development:   docker compose up -d db
+# Full stack in containers: docker compose --profile full up -d --build   → web http://localhost:8080
 services:
   db:
     image: postgres:16
@@ -10,11 +12,32 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U bookstore -d bookstore"]
       interval: 5s
       timeout: 3s
       retries: 10
+
+  api:
+    profiles: ["full"]
+    build: ./src/BookStore.Api
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__BookStore: "Host=db;Port=5432;Database=bookstore;Username=bookstore;Password=bookstore_local_dev"
+    ports:
+      - "5080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    profiles: ["full"]
+    build: ./web
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
 
 volumes:
   pgdata:

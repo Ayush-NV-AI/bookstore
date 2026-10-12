@@ -43,3 +43,12 @@ body { margin: 0; }
 .book-detail-body { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 24px; }
 .book-detail-price { font-size: 1.5rem; font-weight: 700; }
 .book-detail-meta { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; color: var(--muted); }
+
+.cart-link { color: var(--ink); text-decoration: none; font-weight: 600; }
+.add-to-cart { display: flex; align-items: center; gap: 12px; margin: 12px 0; }
+.cart-table { width: 100%; border-collapse: collapse; background: var(--surface); margin: 12px 0; }
+.cart-table th, .cart-table td { text-align: left; padding: 10px; border-bottom: 1px solid var(--line); }
+.cart-subtotal { font-size: 1.1rem; }
+.checkout-form { display: flex; flex-direction: column; gap: 8px; max-width: 360px; }
+.checkout-form input { padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; }
+a.button { display: inline-block; text-decoration: none; }

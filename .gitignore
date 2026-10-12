@@ -15,3 +15,6 @@ secrets/
 # test output
 web/playwright-report/
 web/test-results/
+
+# hook logs (local evidence, not source)
+.gemini/hooks/logs/

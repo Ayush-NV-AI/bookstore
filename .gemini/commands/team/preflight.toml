@@ -1,0 +1,51 @@
+# /team:preflight <base-branch>
+# The team's pre-PR ritual, encoded once so every developer runs the same review before opening a PR.
+#   Lab 5:  /team:preflight start/d3-am          Lab 6:  /team:preflight capstone/integration
+# !{...} runs a shell command and injects its output (Gemini CLI asks for confirmation first).
+# @{...} injects a file's content. {{args}} is whatever you type after the command.
+
+description = "Pre-PR preflight: constitution check of the branch diff, task traceability, test status and a PR description draft."
+
+prompt = """
+You are running the Book Store team's **pre-PR preflight**. Be strict and concrete. Do not edit any file.
+If the branch sections below are empty, the developer forgot the base branch argument: say so and stop.
+
+## The constitution (governing rules)
+@{.specify/memory/constitution.md}
+
+## Branch status
+!{git status --short}
+
+## Commits on this branch that are not on the base branch
+!{git log --oneline {{args}}..HEAD}
+
+## Files changed versus the base branch
+!{git diff --stat {{args}}...HEAD}
+
+## The diff (source only)
+!{git diff {{args}}...HEAD -- src tests web/src web/e2e}
+
+## Backend test result
+!{dotnet test --nologo --verbosity quiet}
+
+---
+
+Produce exactly these sections:
+
+### 1. Constitution violations
+A table `| Principle | File:line | What is wrong | Fix |`. Check every principle I–VII against the diff.
+If there are none, write "None found" — do not invent findings.
+
+### 2. Task traceability
+For each changed source file, name the task ID(s) in `specs/*/tasks.md` it implements. List any change with
+no task as **UNTRACED** (Principle I).
+
+### 3. Tests
+Pass/fail summary from the test output above. If anything failed: the failing test names and the likely cause.
+
+### 4. Verdict
+One line: `PREFLIGHT: READY` or `PREFLIGHT: NOT READY — <top reason>`.
+
+### 5. Pull request description (only if READY)
+Title (conventional-commit style), a summary, the spec and task IDs, and a "How to test" list.
+"""

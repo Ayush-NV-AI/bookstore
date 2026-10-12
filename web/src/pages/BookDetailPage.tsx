@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import { getBook } from '../api/catalog'
 import { ApiError, isAbort } from '../api/client'
+import { messageFrom } from '../api/errors'
 import type { BookDetail } from '../api/types'
+import { useCart } from '../cart/CartContext'
 import StatusMessage from '../components/StatusMessage'
 import { formatInr } from '../lib/money'
 
@@ -20,6 +22,22 @@ export default function BookDetailPage() {
 
   const [state, setState] = useState<LoadState>({ status: 'loading' })
   const [reloadKey, setReloadKey] = useState(0)
+  const { addOne } = useCart()
+  const [cartMessage, setCartMessage] = useState<string | null>(null)
+  const [adding, setAdding] = useState(false)
+
+  async function onAddToCart(bookId: number) {
+    setAdding(true)
+    setCartMessage(null)
+    try {
+      await addOne(bookId)
+      setCartMessage('Added to cart.')
+    } catch (error) {
+      setCartMessage(messageFrom(error, 'We could not add this book to your cart.'))
+    } finally {
+      setAdding(false)
+    }
+  }
 
   useEffect(() => {
     const bookId = Number(id)
@@ -75,6 +93,22 @@ export default function BookDetailPage() {
           >
             {state.book.inStock ? `In stock (${state.book.stockQuantity})` : 'Out of stock'}
           </p>
+          <div className="add-to-cart">
+            <button
+              type="button"
+              className="button"
+              disabled={!state.book.inStock || adding}
+              onClick={() => onAddToCart(state.book.id)}
+              data-testid="add-to-cart"
+            >
+              Add to cart
+            </button>
+            {cartMessage && (
+              <span role="status" data-testid="add-to-cart-status">
+                {cartMessage}
+              </span>
+            )}
+          </div>
           <p className="book-detail-description">{state.book.description}</p>
           <dl className="book-detail-meta">
             <dt>ISBN</dt>

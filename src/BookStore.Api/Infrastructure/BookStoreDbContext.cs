@@ -1,4 +1,6 @@
+using BookStore.Api.Features.Carts;
 using BookStore.Api.Features.Catalog;
+using BookStore.Api.Features.Orders;
 using Microsoft.EntityFrameworkCore;
 
 namespace BookStore.Api.Infrastructure;
@@ -10,6 +12,10 @@ namespace BookStore.Api.Infrastructure;
 public sealed class BookStoreDbContext(DbContextOptions<BookStoreDbContext> options) : DbContext(options)
 {
     public DbSet<Book> Books => Set<Book>();
+    public DbSet<Cart> Carts => Set<Cart>();
+    public DbSet<CartItem> CartItems => Set<CartItem>();
+    public DbSet<Order> Orders => Set<Order>();
+    public DbSet<OrderLine> OrderLines => Set<OrderLine>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -40,6 +40,19 @@ specs/<###-feature>/              Spec Kit artifacts (spec, plan, research, data
 | PostgreSQL 16 | `localhost:5432`, db `bookstore` | Docker Desktop, volume `pgdata` |
 | API | `http://localhost:5080` | `/health` for readiness |
 | Web (dev) | `http://localhost:5173` | Vite proxies `/api` to the API |
+| API (container, profile `full`) | `http://localhost:5080` → `api:8080` | non-root `aspnet:10.0` image |
+| Web (container, profile `full`) | `http://localhost:8080` | nginx serves the SPA and proxies `/api` to `api:8080` |
+
+## Features
+
+| Feature | Folder | Routes | Spec |
+|---|---|---|---|
+| Catalog | `Features/Catalog` | `/api/v1/catalog/*` | `specs/001-book-catalog` |
+| Cart | `Features/Carts` | `/api/v1/carts/*` | `specs/002-orders-cart` |
+| Orders | `Features/Orders` | `/api/v1/orders/*` | `specs/002-orders-cart` |
+
+Business-rule failures are thrown as `NotFoundException` / `ConflictException` / `DomainValidationException`
+(`Infrastructure/DomainExceptions.cs`) and mapped to Problem Details by `DomainExceptionHandler`.
 
 ## Data
 

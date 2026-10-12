@@ -6,5 +6,51 @@
     "plan": {
       "directory": ".gemini/plans"
     }
+  },
+  "hooks": {
+    "BeforeTool": [
+      {
+        "matcher": "write_file|replace",
+        "hooks": [
+          {
+            "name": "constitution-guard",
+            "type": "command",
+            "command": "node .gemini/hooks/constitution-guard.mjs",
+            "timeout": 10000,
+            "description": "Blocks file writes that violate Constitution III, IV, V or VI"
+          }
+        ]
+      }
+    ],
+    "AfterAgent": [
+      {
+        "hooks": [
+          {
+            "name": "build-gate",
+            "type": "command",
+            "command": "node .gemini/hooks/after-agent-build-gate.mjs",
+            "timeout": 180000,
+            "description": "Sends the agent back if the code it changed does not build (max 2 retries)"
+          }
+        ]
+      }
+    ]
+  },
+  "mcpServers": {
+    "bookstore-db": {
+      "command": "npx",
+      "args": ["-y", "@toolbox-sdk/server", "--prebuilt=postgres", "--stdio"],
+      "env": {
+        "POSTGRES_HOST": "localhost",
+        "POSTGRES_PORT": "5432",
+        "POSTGRES_DATABASE": "bookstore",
+        "POSTGRES_USER": "bookstore_ro",
+        "POSTGRES_PASSWORD": "$BOOKSTORE_RO_PASSWORD"
+      },
+      "includeTools": ["list_tables", "execute_sql"],
+      "trust": false,
+      "timeout": 30000,
+      "description": "Read-only PostgreSQL access for verifying schema and data (role bookstore_ro)"
+    }
   }
 }

@@ -1,0 +1,16 @@
+# /team:adr <decision in one sentence>
+description = "Draft an Architecture Decision Record in docs/adr/ for a decision taken in this session."
+
+prompt = """
+Draft an Architecture Decision Record for this decision: {{args}}
+
+Existing ADRs (for numbering and style):
+!{git ls-files docs/adr}
+
+Constitution (an ADR must not contradict it):
+@{.specify/memory/constitution.md}
+
+Write the ADR to `docs/adr/NNNN-<kebab-title>.md` using the next number, with sections:
+Status (Proposed), Context, Decision, Consequences (positive and negative), Alternatives considered,
+Constitution principles affected. Keep it under 60 lines. Show me the file path when done.
+"""

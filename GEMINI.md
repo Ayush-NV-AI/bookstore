@@ -35,6 +35,19 @@ prompt in this repository.
 | Frontend dev server (http://localhost:5173) | `npm --prefix web run dev` |
 | Frontend build (type-check) | `npm --prefix web run build` |
 | UI tests | `npm --prefix web run test:e2e` |
+| Full stack in containers (web on http://localhost:8080) | `docker compose --profile full up -d --build` |
+| Prove the constitution hook (no model calls) | `node .gemini/hooks/test-constitution-guard.mjs` |
+
+## Extensions of the agent in this repo
+
+- **Subagents** (`.gemini/agents/`): `@cart-api-builder`, `@orders-api-builder`, `@storefront-ui-builder`,
+  `@contract-auditor` (read-only). Subagents cannot call other subagents — the parent session orchestrates.
+- **Custom commands** (`.gemini/commands/team/`): `/team:preflight <base-branch>` before every PR, `/team:adr` for decisions.
+- **Hooks** (`.gemini/settings.json`): `constitution-guard` (BeforeTool) blocks non-compliant writes;
+  `build-gate` (AfterAgent) sends you back if the build is red. A blocked write is not an error to work
+  around — read the reason and comply.
+- **MCP** `bookstore-db`: read-only PostgreSQL (`list_tables`, `execute_sql` as `bookstore_ro`). Use it to verify
+  schema and data; never to change them.
 
 ## Detailed context (modular imports)
 

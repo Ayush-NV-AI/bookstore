@@ -1,4 +1,6 @@
+using BookStore.Api.Features.Carts;
 using BookStore.Api.Features.Catalog;
+using BookStore.Api.Features.Orders;
 using BookStore.Api.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,6 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<DomainExceptionHandler>();
 
 // The "Testing" environment (WebApplicationFactory) registers its own provider.
 if (!builder.Environment.IsEnvironment("Testing"))
@@ -19,6 +22,8 @@ if (!builder.Environment.IsEnvironment("Testing"))
 }
 
 builder.Services.AddScoped<ICatalogService, CatalogService>();
+builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 
 builder.Services.AddCors(options => options.AddPolicy(DevWebCorsPolicy, policy =>
     policy.WithOrigins("http://localhost:5173").AllowAnyHeader().AllowAnyMethod()));

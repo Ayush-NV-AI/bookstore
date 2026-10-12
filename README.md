@@ -27,3 +27,12 @@ npm --prefix web run test:e2e                 # Playwright against the real API 
 - `GEMINI.md` + `docs/context/*.md` — what the agent is told on every prompt.
 - `specs/<###-feature>/` — spec → plan → tasks for every feature.
 - `.aiexclude` / `.geminiignore` — what the agent may never read.
+
+## Capstone (Day 3 PM)
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\regression.ps1 -Containers   # every suite, both stacks
+node scripts/ci/constitution-gate.mjs                                           # headless gate: 0 pass · 1 fail · 2 error
+```
+
+Demo flow: `docs/demo/capstone-demo.md`. CI: `.github/workflows/ci.yml`.
